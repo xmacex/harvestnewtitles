@@ -1,0 +1,33 @@
+#!/usr/bin/perl
+
+use HTTP::OAI;
+use HTTP::OAI::Metadata::OAI_DC;
+use DateTime;
+
+my $dt = DateTime->now();
+my $yesterday = $dt->subtract(days=>1);
+$yesterday = ($yesterday . "Z"); #ok this is not the way to do it! ;)
+
+#print $yesterday, "\n";
+#die("i iz teh ded" . "\n");
+
+my $harvester = HTTP::OAI::Harvester->new(
+    baseURL=>'http://biblio.ugent.be/oai',
+    agent=>'libwww-perl/KDK-noutaja ',
+    from=>'mace@kirjakaapeli.lib.hel.fi');
+my $response = $harvester->ListRecords(
+    metadataPrefix=>'oai_dc',
+    from=>$yesterday,
+    handlers=>{metadata=>'HTTP::OAI::Metadata::OAI_DC'},
+    );
+
+if ($response->is_error) {
+    die ("Error harvesing: " . $response->message . "\n");
+}
+
+while (my $rec = $response->next) {
+    print (@{$rec->metadata->dc->{'creator'}});
+    print (": ");
+    print (@{$rec->metadata->dc->{'title'}});
+    print (" (", @{$rec->metadata->dc->{'date'}}, ")", "\n");
+}

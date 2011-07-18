@@ -1,0 +1,3 @@
+A little conceptual Perl-harvester, which uses OAI-PMH harvesting to
+fetch a list of recently added records from system, and presents them
+to the user.
