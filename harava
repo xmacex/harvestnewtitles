@@ -1,18 +1,32 @@
 #!/usr/bin/perl
+# Fetch a list of new titles over OAI-PMH harvesting. Takes one argument,
+# the repository to fetch from. Try University of Ghent f.ex. "http://biblio.ugent.be/oai"
+# or arXiv "http://export.arxiv.org/oai2"
 
 use HTTP::OAI;
 use HTTP::OAI::Metadata::OAI_DC;
 use DateTime;
 
+# command line argument handling
+$oairepo = $ARGV[0];
+
+if (not $oairepo) {
+	die ("No repo to harvest :P");
+};
+
+# ok start working
 my $dt = DateTime->now();
 my $yesterday = $dt->subtract(days=>1);
-$yesterday = ($yesterday . "Z"); #ok this is not the way to do it! ;)
+$yesterday = $yesterday . "Z"; #ok this is not the way to do it! ;)
 
+# testing stuff
+#print $oairepo, "\n";
 #print $yesterday, "\n";
 #die("i iz teh ded" . "\n");
 
+# harvest
 my $harvester = HTTP::OAI::Harvester->new(
-    baseURL=>'http://biblio.ugent.be/oai',
+    baseURL=>"$oairepo",
     agent=>'libwww-perl/KDK-noutaja ',
     from=>'mace@kirjakaapeli.lib.hel.fi');
 my $response = $harvester->ListRecords(
@@ -25,6 +39,7 @@ if ($response->is_error) {
     die ("Error harvesing: " . $response->message . "\n");
 }
 
+# parse and print the results
 while (my $rec = $response->next) {
     print (@{$rec->metadata->dc->{'creator'}});
     print (": ");
